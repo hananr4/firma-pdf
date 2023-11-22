@@ -1,6 +1,7 @@
 using iTextSharp.text;
 using iTextSharp.text.pdf.parser;
 
+namespace Greensoft.SignPdf;
 public class MyLocationTextExtractionStrategy : LocationTextExtractionStrategy
 {
   public List<Rectangle> MatchedLocations = new List<Rectangle>();

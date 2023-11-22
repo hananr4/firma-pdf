@@ -1,20 +1,12 @@
-﻿using iTextSharp.text;
-using iTextSharp.text.pdf;
-using iTextSharp.text.pdf.parser;
-using iTextSharp.text.pdf.security;
-
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.Security;
-
-using System.Security.Cryptography.X509Certificates;
+﻿
+namespace Greensoft.SignPdf;
 
 class Program
 {
   static void Main(string[] args)
   {
     SignPdfService.Sign(
-        pathToPdf: @".\docs\sample2.pdf"
+        pathToPdf: @".\docs\sa1mple2.pdf"
       , pathToPfx: Environment.GetEnvironmentVariable("P12_FILE") ?? ""
       , pfxPassword: Environment.GetEnvironmentVariable("P12_PASSWORD") ?? ""
       , searchText: "[FIRMA_________ASESOR]"

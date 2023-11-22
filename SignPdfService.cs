@@ -8,6 +8,7 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 
+namespace Greensoft.SignPdf;
 public class SignPdfService
 {
   public static void Sign(
