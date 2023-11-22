@@ -9,10 +9,17 @@ using iTextSharp.text.pdf.security;
 using System.Text;
 using iTextSharp.text.pdf.parser;
 
-string pathToPdf = @"C:\temp\dotnet\firmaPdf\sample3.pdf";
-string pathToNewPdf = @"C:\temp\dotnet\firmaPdf\sample3_firmado.pdf";
-string pathToPfx = @"C:\temp\fact-elect\greensoft\certificado\GERENTE GENERAL HANAN LISANDRO RODRIGUEZ MERINO 010523100928.p12";
-string pfxPassword = "Mioysolomio1995";
+string pathToPdf = @".\docs\sample3.pdf";
+string pathToNewPdf = @".\docs\sample3_firmado.pdf";
+string pfxPassword = Environment.GetEnvironmentVariable("P12_PASSWORD")??"";
+string pathToPfx = Environment.GetEnvironmentVariable("P12_FILE")??"";
+string searchText = "OBLIGADO A LLEVAR CONTABILIDAD";
+//string searchText = "VALOR TOTAL"; // FIRMA
+string reason = "Aprobación de crédito";
+string contact = "user@domain.com";
+string location = "Quito";
+string imagePath = @".\docs\firma.png";
+
 
 // Cargar el certificado PFX
 Pkcs12Store store = new Pkcs12Store(new FileStream(pathToPfx, FileMode.Open, FileAccess.Read), pfxPassword.ToCharArray());
@@ -34,10 +41,11 @@ AsymmetricKeyParameter privKey = store.GetKey(alias).Key;
 
 // Abrir el PDF y preparar el objeto de firma
 PdfReader reader = new PdfReader(pathToPdf);
-string searchText = "OBLIGADO A LLEVAR CONTABILIDAD";
 
 float left= 0;
 float top = 0;
+float right = 0;
+float bottom = 0;
 Rectangle rect2 = new Rectangle(100,100,100,100);   
         for (int i = 1; i <= reader.NumberOfPages; i++)
         {
@@ -51,7 +59,9 @@ Rectangle rect2 = new Rectangle(100,100,100,100);
                     Console.WriteLine($"Encontrado en la página {i} en la ubicación {rect.Left},{rect.Bottom}");
                     left = rect.Left;
                     top = rect.Top;
-                    rect2 = new Rectangle(rect.Left, rect.Bottom, rect.Right, rect.Top);
+                    right = rect.Right;
+                    bottom = rect.Bottom;
+
                 }
             }
         }
@@ -62,13 +72,23 @@ Rectangle rect2 = new Rectangle(100,100,100,100);
 FileStream os = new FileStream(pathToNewPdf, FileMode.Create);
 PdfStamper stamper = PdfStamper.CreateSignature(reader, os, '\0');  
 PdfSignatureAppearance appearance = stamper.SignatureAppearance;
-appearance.Reason = "Aprobación de crédito";
-appearance.Contact = "hanan.rodriguez@greensoft.com.ec";
-appearance.Location = "Quito, Ecuador";
+appearance.Reason = reason;
+appearance.Contact = contact;
+appearance.Location = location;
 appearance.SignatureRenderingMode = PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION;
-appearance.SignatureGraphic = Image.GetInstance(@"C:\temp\cedia.png");  
+appearance.SignatureGraphic = Image.GetInstance(imagePath);  
   
-appearance.SetVisibleSignature(new Rectangle(left, top, left + 100, top + 100), 1, "Firma");
+var rectangle = new Rectangle( left, bottom, right, top){ 
+    Border = Rectangle.BOX,
+    BorderWidth = 2,
+    BorderColor = BaseColor.RED,
+    Left = left,
+    Right = right,
+    Top = top - (top - bottom),
+    Bottom = bottom - 50
+    
+};
+appearance.SetVisibleSignature(rectangle, 1, "Firma");
 
 // appearance.SetVisibleSignature( rect2!, 1, "Firma");
  //appearance.SetVisibleSignature( new Rectangle(50, 50,50, 50, 1), 1, "Firma");
