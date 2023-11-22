@@ -9,13 +9,17 @@ using iTextSharp.text.pdf.security;
 using System.Text;
 using iTextSharp.text.pdf.parser;
 
-string pathToPdf = @".\docs\sample5.pdf";
+
+
+
+string pathToPdf = @".\docs\sample2.pdf";
 string imagePath = @".\docs\firma.png";
 
-// string searchText = "OBLIGADO A LLEVAR CONTABILIDAD";
+// string searchText = "OBLIGADO A LLEVAR CONTABILIDAD";    
 //string searchText = "VALOR TOTAL"; // FIRMA
 // string searchText = "NÚMERO DE AUTORIZACIÓN"; // FIRMA
-string searchText = "APROBADO"; // FIRMA
+//string searchText = "APROBADO"; // FIRMA
+string searchText = "[FIRMA_________ASESOR]"; // FIRMA
 string reason = "Aprobación de crédito";
 string contact = "user@domain.com";
 string location = "Quito";
@@ -50,7 +54,7 @@ if (!Directory.Exists(dirOutput))
   Directory.CreateDirectory(dirOutput);
 }
 string pathToNewPdf = System.IO.Path.Combine(dirOutput, $"{fi.Name}_firmado.pdf");
-  
+
 // Cargar el certificado PFX
 Pkcs12Store store = new Pkcs12Store(new FileStream(pathToPfx, FileMode.Open, FileAccess.Read), pfxPassword.ToCharArray());
 string alias = string.Empty;
@@ -79,10 +83,10 @@ float bottom = 0;
 for (int i = 1; i <= reader.NumberOfPages; i++)
 {
   var strategy = new MyLocationTextExtractionStrategy(searchText);
-   ITextExtractionStrategy strategy2 = new SimpleTextExtractionStrategy();
-    
-  string currentText = PdfTextExtractor.GetTextFromPage(reader, i, strategy);
+  ITextExtractionStrategy strategy2 = new SimpleTextExtractionStrategy();
 
+  string currentText = PdfTextExtractor.GetTextFromPage(reader, i, strategy);
+  strategy.MatchWord();
   if (strategy.MatchedLocations.Count > 0)
   {
     foreach (var rect in strategy.MatchedLocations)
@@ -143,34 +147,3 @@ reader.Close();
 
 
 
-
-public class MyLocationTextExtractionStrategy : LocationTextExtractionStrategy
-{
-  public List<iTextSharp.text.Rectangle> MatchedLocations = new List<iTextSharp.text.Rectangle>();
-  private string searchText;
-
-  public MyLocationTextExtractionStrategy(string searchText)
-  {
-    this.searchText = searchText;
-  }
-
-  public override void RenderText(TextRenderInfo renderInfo)
-  {
-    base.RenderText(renderInfo);
-
-    string currentText = renderInfo.GetText();  
-
-Console.Write(currentText);  
-
-    if (currentText.Contains(searchText))
-    {
-      var bottomLeft = renderInfo.GetDescentLine().GetStartPoint();
-      var topRight = renderInfo.GetAscentLine().GetEndPoint();
-      var rect = new iTextSharp.text.Rectangle(
-          bottomLeft[Vector.I1], bottomLeft[Vector.I2],
-          topRight[Vector.I1], topRight[Vector.I2]
-      );
-      MatchedLocations.Add(rect);
-    }
-  }
-}
